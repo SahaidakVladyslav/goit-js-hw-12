@@ -1,0 +1,129 @@
+/**
+  |============================
+  | include css partials with
+  | default @import url()
+  |============================
+*/
+@import url('./reset.css');
+@import url('./vite-promo.css');
+@import url('./header.css');
+
+:root {
+font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+font-size: 16px;
+line-height: 24px;
+font-weight: 400;
+
+color: #242424;
+background-color: rgba(255, 255, 255, 0.87);
+
+font-synthesis: none;
+text-rendering: optimizeLegibility;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-text-size-adjust: 100%;
+}
+.search__form {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+input {
+  box-sizing: border-box;
+  padding: 0 8px 0 8px;
+  width: 280px;
+  height: 40px;
+  border-radius: 4px;
+  margin-right: 8px;
+  border: 1px solid #808080;
+}
+
+.search--btn {
+  box-sizing: border-box;
+  padding: 8px 16px;
+  border-radius: 8px;
+  height: 40px;
+  background-color: #4e75ff;
+  color: #fff;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5em;
+  letter-spacing: .64px;
+  border: none;
+}
+.gallery {
+display: flex;
+flex-wrap: wrap;
+gap: 24px;
+}
+.gallery__item {
+width: calc((100% - 72px)/4);
+box-shadow: 5px 5px 10px #696969;
+border-bottom-left-radius: 4px;
+border-bottom-right-radius: 4px;
+
+}
+.gallery--img {
+width: 100%;
+height: 200px;
+object-fit: cover;
+}
+p {
+width: auto;
+text-align: center;
+color: #2e2f42;
+font-family: Montserrat;
+font-size: 14px;
+font-style: normal;
+font-weight: 700;
+line-height: 1em;
+letter-spacing: .64px;
+}
+
+.gallery__list--characters{
+border: 1px solid black;
+padding: 8px 16px;
+display: flex;
+justify-content: space-around;
+gap: 8px;
+border-bottom-left-radius: 4px;
+border-bottom-right-radius: 4px; 
+}
+.loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-block;
+  border-top: 4px solid #000000;
+  border-right: 4px solid transparent;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.loader::after {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border-left: 4px solid #FF3D00;
+  border-bottom: 4px solid transparent;
+  animation: rotation 0.5s linear infinite reverse;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
