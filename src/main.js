@@ -27,7 +27,7 @@ const gallery = new SimpleLightbox('.gallery a', {
     captionPosition: 'bottom',
 });
 
-async function promesUrl(number, value) {
+async function fetchImagesFromApi(number, value) {
     const urlFromPixaby = new URLSearchParams({
         key: '41648594-e525389370aefc2e125a1a54e',
         q: value,
@@ -43,38 +43,40 @@ async function promesUrl(number, value) {
             method: 'get',
             url: `https://pixabay.com/api/?${urlFromPixaby}`
         });
-
         if (response.data.hits.length < 40) {
             // it is lower then 40
             BtnSwitcherOn()
+
         }
         return response;
 
     } catch (error) {
-        if (error.message === 'Request failed with status code 400') {
-            BtnSwitcherOn()
-            iziToast.info({
-                title: 'Greetings!',
-                message: "We're sorry, but you've reached the end of search results.",
-            });
-        }
-        console.log(error)
+        BtnSwitcherOn()
+        iziToast.info({
+            title: 'Greetings!',
+            message: "We're sorry, but you've reached the end of search results.",
+        });
     }
 };
 
 async function response(number, value) {
     try {
-        const pixabayInformation = await promesUrl(number, value)
-        gallery.refresh();
+
+        const pixabayInformation = await fetchImagesFromApi(number, value)
+
         loaderSwitch()
         if (count !== 1) {
             galleryEl.insertAdjacentHTML('beforeend', markup(pixabayInformation.data));
-
+            gallery.refresh();
         } else {
             galleryEl.innerHTML = markup(pixabayInformation.data)
+            gallery.refresh();
         }
     } catch (error) {
-        console.log(error)
+        iziToast.error({
+            title: 'Error',
+            message: 'Sorry, there are no images matching your search query. Please try again!',
+        });
     }
 
 };
@@ -117,7 +119,7 @@ const izitoast = async () => {
 
     try {
 
-        const respons = await promesUrl(1, inputEl.value)
+        const respons = await fetchImagesFromApi(1, inputEl.value)
 
         if (respons.data.hits.length === 0) {
             BtnSwitcherOn()
@@ -131,7 +133,10 @@ const izitoast = async () => {
         BtnSwitcherOf()
 
     } catch (error) {
-        console.log(error)
+        iziToast.error({
+            title: 'Error',
+            message: 'Sorry, there are no images matching your search query. Please try again!',
+        });
     }
 
 };
@@ -167,10 +172,13 @@ formEl.addEventListener('submit', (event) => {
 });
 
 BtnMoreEl.addEventListener('click', (event) => {
+
     loaderMoreSwitch()
     count += 1
     searchValue = nonExistSpan.textContent;
     response(count, searchValue)
     loaderSwitch()
     loaderMoreSwitch()
+    fetchImagesFromApi((count + 1), searchValue)
 });
+
