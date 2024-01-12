@@ -95,7 +95,7 @@ border-bottom-right-radius: 4px;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  display: inline-block;
+  display:block;
   border-top: 4px solid #000000;
   border-right: 4px solid transparent;
   box-sizing: border-box;
@@ -127,3 +127,25 @@ border-bottom-right-radius: 4px;
     transform: rotate(360deg);
   }
 }
+
+.switcher {
+  display: none;
+}
+
+
+.more--btn {
+  display: block;
+  margin-right: auto;
+  margin-left: auto;
+margin-top: 20px;
+margin-bottom: 20px;
+
+}
+.switcher{
+  display: none;
+}
+.non-existent { 
+  display: none;
+}
+
+
