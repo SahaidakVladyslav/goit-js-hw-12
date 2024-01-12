@@ -7,7 +7,11 @@ import axios from "axios";
 const formEl = document.querySelector('.js-search-form');
 const inputEl = document.querySelector('input');
 const galleryEl = document.querySelector('.gallery');
+
 const loaderEl = document.querySelector('.loader');
+
+const loaderMoreEl = document.querySelector('.js-loader')
+
 const BtnMoreEl = document.querySelector('.more--btn');
 const nonExistSpan = document.querySelector('.non-existent');
 
@@ -30,7 +34,7 @@ async function promesUrl(number, value) {
         image_type: "photo",
         orientation: "horizontal",
         safesearch: true,
-        per_page: 40,
+        per_page: 150,
         page: number
     })
     try {
@@ -40,16 +44,27 @@ async function promesUrl(number, value) {
             url: `https://pixabay.com/api/?${urlFromPixaby}`
         });
 
+        if (response.data.hits.length < 40) {
+            // it is lower then 40
+            BtnSwitcherOn()
+        }
         return response;
 
     } catch (error) {
+        if (error.message === 'Request failed with status code 400') {
+            BtnSwitcherOn()
+            iziToast.info({
+                title: 'Greetings!',
+                message: "We're sorry, but you've reached the end of search results.",
+            });
+        }
         console.log(error)
     }
 };
 
 async function response(number, value) {
-    const pixabayInformation = await promesUrl(number, value)
     try {
+        const pixabayInformation = await promesUrl(number, value)
         gallery.refresh();
         loaderSwitch()
         if (count !== 1) {
@@ -91,6 +106,13 @@ const loaderSwitch = () => {
 
 };
 
+const loaderMoreSwitch = () => {
+    loaderMoreEl.classList.toggle('non-existent')
+
+}
+
+
+
 const izitoast = async () => {
 
     try {
@@ -131,6 +153,9 @@ const saveInputValue = (e) => {
 };
 
 
+
+
+
 formEl.addEventListener('submit', (event) => {
     event.preventDefault()
     count = 1;
@@ -142,10 +167,10 @@ formEl.addEventListener('submit', (event) => {
 });
 
 BtnMoreEl.addEventListener('click', (event) => {
+    loaderMoreSwitch()
     count += 1
     searchValue = nonExistSpan.textContent;
     response(count, searchValue)
     loaderSwitch()
+    loaderMoreSwitch()
 });
-
-
