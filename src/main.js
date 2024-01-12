@@ -34,7 +34,7 @@ async function promesUrl(number, value) {
         image_type: "photo",
         orientation: "horizontal",
         safesearch: true,
-        per_page: 150,
+        per_page: 40,
         page: number
     })
     try {
