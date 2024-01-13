@@ -7,16 +7,15 @@ import axios from "axios";
 const formEl = document.querySelector('.js-search-form');
 const inputEl = document.querySelector('input');
 const galleryEl = document.querySelector('.gallery');
-
 const loaderEl = document.querySelector('.loader');
 
 const loaderMoreEl = document.querySelector('.js-loader')
-
 const BtnMoreEl = document.querySelector('.more--btn');
-const nonExistSpan = document.querySelector('.non-existent');
 
+const nonExistSpan = document.querySelector('.non-existent');
 let count = 1;
 let searchValue;
+
 
 const gallery = new SimpleLightbox('.gallery a', {
     captions: true,
@@ -26,6 +25,7 @@ const gallery = new SimpleLightbox('.gallery a', {
     captionsData: 'alt',
     captionPosition: 'bottom',
 });
+
 
 async function fetchImagesFromApi(number, value) {
     const urlFromPixaby = new URLSearchParams({
@@ -43,21 +43,17 @@ async function fetchImagesFromApi(number, value) {
             method: 'get',
             url: `https://pixabay.com/api/?${urlFromPixaby}`
         });
-        if (response.data.hits.length < 40) {
-            // it is lower then 40
-            BtnSwitcherOn()
 
-        }
+
+
         return response;
 
     } catch (error) {
-        BtnSwitcherOn()
-        iziToast.info({
-            title: 'Greetings!',
-            message: "We're sorry, but you've reached the end of search results.",
-        });
+        return false
+
     }
 };
+
 
 async function response(number, value) {
     try {
@@ -65,6 +61,7 @@ async function response(number, value) {
         const pixabayInformation = await fetchImagesFromApi(number, value)
 
         loaderSwitch()
+
         if (count !== 1) {
             galleryEl.insertAdjacentHTML('beforeend', markup(pixabayInformation.data));
             gallery.refresh();
@@ -72,14 +69,13 @@ async function response(number, value) {
             galleryEl.innerHTML = markup(pixabayInformation.data)
             gallery.refresh();
         }
+        scrollToNextGroup();
     } catch (error) {
-        iziToast.error({
-            title: 'Error',
-            message: 'Sorry, there are no images matching your search query. Please try again!',
-        });
+
     }
 
 };
+
 
 function markup({ hits }) {
 
@@ -102,6 +98,58 @@ function markup({ hits }) {
 
 };
 
+
+const izitoast = async (value) => {
+
+    try {
+        const nextResponse = await fetchImagesFromApi((count + 1), value)
+
+        if (nextResponse === false || nextResponse.data.hits.length === 0) {
+            BtnMoreEl.classList.add('switcher')
+
+            return iziToast.info({
+                title: 'Hey!',
+                message: 'Sorry, there are no more images matching your search query. Please try find some another photo!',
+            });
+        }
+
+
+        const respons = await fetchImagesFromApi(1, inputEl.value)
+
+        if (respons.data.hits.length < 40) {
+            BtnMoreEl.classList.add('switcher');
+            console.log("izitoast")
+            return iziToast.info({
+                title: 'Hey!',
+                message: 'Sorry, there are no more images matching your search query.',
+            });
+        }
+
+
+        if (respons.data.hits.length === 0) {
+            BtnMoreEl.classList.add('switcher');
+            galleryEl.innerHTML = ''
+            return iziToast.error({
+                title: 'Error',
+                message: 'Sorry, there are no images matching your search query. Please try again!',
+            });
+
+        }
+        BtnMoreEl.classList.remove('switcher');
+
+    } catch (error) {
+
+    }
+
+};
+
+
+
+const saveInputValue = (e) => {
+    nonExistSpan.textContent = e;
+    return nonExistSpan.textContent;
+};
+
 const loaderSwitch = () => {
 
     loaderEl.classList.toggle('switcher')
@@ -113,52 +161,31 @@ const loaderMoreSwitch = () => {
 
 }
 
+function getGalleryItemHeight() {
+    const firstGalleryItem = document.querySelector('.gallery__item');
+    if (firstGalleryItem) {
+        const rect = firstGalleryItem.getBoundingClientRect();
+        return rect.height;
+    }
+    return 0;
+}
 
+function scrollToNextGroup() {
+    const galleryItemHeight = getGalleryItemHeight();
 
-const izitoast = async () => {
-
-    try {
-
-        const respons = await fetchImagesFromApi(1, inputEl.value)
-
-        if (respons.data.hits.length === 0) {
-            BtnSwitcherOn()
-            galleryEl.innerHTML = ''
-            return iziToast.error({
-                title: 'Error',
-                message: 'Sorry, there are no images matching your search query. Please try again!',
-            });
-
-        }
-        BtnSwitcherOf()
-
-    } catch (error) {
-        iziToast.error({
-            title: 'Error',
-            message: 'Sorry, there are no images matching your search query. Please try again!',
+    if (galleryItemHeight > 0) {
+        window.scrollBy({
+            top: galleryItemHeight * 2,
+            left: 0,
+            behavior: 'smooth',
         });
     }
+}
 
-};
+
 
 
 loaderSwitch();
-
-const BtnSwitcherOn = () => {
-    return BtnMoreEl.classList.add('switcher');
-};
-
-const BtnSwitcherOf = () => {
-    return BtnMoreEl.classList.remove('switcher');
-};
-
-const saveInputValue = (e) => {
-    nonExistSpan.textContent = e;
-    return nonExistSpan.textContent;
-};
-
-
-
 
 
 formEl.addEventListener('submit', (event) => {
@@ -166,7 +193,7 @@ formEl.addEventListener('submit', (event) => {
     count = 1;
     loaderSwitch()
     response(1, inputEl.value)
-    izitoast()
+    izitoast(inputEl.value)
     saveInputValue(inputEl.value);
     formEl.reset()
 });
@@ -177,8 +204,8 @@ BtnMoreEl.addEventListener('click', (event) => {
     count += 1
     searchValue = nonExistSpan.textContent;
     response(count, searchValue)
+    izitoast(searchValue)
     loaderSwitch()
     loaderMoreSwitch()
-    fetchImagesFromApi((count + 1), searchValue)
 });
 
