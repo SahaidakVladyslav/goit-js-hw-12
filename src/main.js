@@ -57,11 +57,10 @@ async function fetchImagesFromApi(number, value) {
 
 async function response(number, value) {
     try {
-
         const pixabayInformation = await fetchImagesFromApi(number, value)
 
         loaderSwitch()
-
+        izitoast(pixabayInformation)
         if (count !== 1) {
             galleryEl.insertAdjacentHTML('beforeend', markup(pixabayInformation.data));
             gallery.refresh();
@@ -99,12 +98,11 @@ function markup({ hits }) {
 };
 
 
-const izitoast = async (value) => {
+const izitoast = (value) => {
 
     try {
-        const nextResponse = await fetchImagesFromApi((count + 1), value)
 
-        if (nextResponse === false || nextResponse.data.hits.length === 0) {
+        if (count === 13) {
             BtnMoreEl.classList.add('switcher')
 
             return iziToast.info({
@@ -114,19 +112,15 @@ const izitoast = async (value) => {
         }
 
 
-        const respons = await fetchImagesFromApi(1, inputEl.value)
-
-        if (respons.data.hits.length < 40) {
+        if (value.data.hits.length < 40) {
             BtnMoreEl.classList.add('switcher');
-            console.log("izitoast")
             return iziToast.info({
                 title: 'Hey!',
                 message: 'Sorry, there are no more images matching your search query.',
             });
         }
 
-
-        if (respons.data.hits.length === 0) {
+        if (value.data.hits.length === 0) {
             BtnMoreEl.classList.add('switcher');
             galleryEl.innerHTML = ''
             return iziToast.error({
@@ -136,6 +130,7 @@ const izitoast = async (value) => {
 
         }
         BtnMoreEl.classList.remove('switcher');
+
 
     } catch (error) {
 
@@ -193,7 +188,7 @@ formEl.addEventListener('submit', (event) => {
     count = 1;
     loaderSwitch()
     response(1, inputEl.value)
-    izitoast(inputEl.value)
+    // izitoast(inputEl.value)
     saveInputValue(inputEl.value);
     formEl.reset()
 });
@@ -204,7 +199,7 @@ BtnMoreEl.addEventListener('click', (event) => {
     count += 1
     searchValue = nonExistSpan.textContent;
     response(count, searchValue)
-    izitoast(searchValue)
+    // izitoast(searchValue)
     loaderSwitch()
     loaderMoreSwitch()
 });
