@@ -188,7 +188,6 @@ formEl.addEventListener('submit', (event) => {
     count = 1;
     loaderSwitch()
     response(1, inputEl.value)
-    // izitoast(inputEl.value)
     saveInputValue(inputEl.value);
     formEl.reset()
 });
@@ -199,7 +198,6 @@ BtnMoreEl.addEventListener('click', (event) => {
     count += 1
     searchValue = nonExistSpan.textContent;
     response(count, searchValue)
-    // izitoast(searchValue)
     loaderSwitch()
     loaderMoreSwitch()
 });
