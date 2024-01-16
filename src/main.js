@@ -14,8 +14,10 @@ const BtnMoreEl = document.querySelector('.more--btn');
 
 const nonExistSpan = document.querySelector('.non-existent');
 let count = 1;
+let newCount = 1;
 let searchValue;
-
+let first40Array = [];
+let second40Array = [];
 
 const gallery = new SimpleLightbox('.gallery a', {
     captions: true,
@@ -34,7 +36,7 @@ async function fetchImagesFromApi(number, value) {
         image_type: "photo",
         orientation: "horizontal",
         safesearch: true,
-        per_page: 40,
+        per_page: 80,
         page: number
     })
     try {
@@ -44,13 +46,15 @@ async function fetchImagesFromApi(number, value) {
             url: `https://pixabay.com/api/?${urlFromPixaby}`
         });
 
-
-
         return response;
 
     } catch (error) {
-        return false
-
+        console.error(error.message);
+        BtnMoreEl.classList.add('switcher');
+        return iziToast.info({
+            title: 'Hey!',
+            message: 'We re sorry, but you ve reached the end of search results.',
+        });
     }
 };
 
@@ -58,25 +62,40 @@ async function fetchImagesFromApi(number, value) {
 async function response(number, value) {
     try {
         const pixabayInformation = await fetchImagesFromApi(number, value)
+        // ділимо наш масив 80 ти елементів на два
+        const first40 = pixabayInformation.data.hits.slice(0, 40);
+
+        // Залишаємо всі інші елементи
+        const remaining = pixabayInformation.data.hits.slice(40);
+
+        // Виводимо результати
+        first40Array = [...first40]
+        second40Array = [...remaining]
 
         loaderSwitch()
-        izitoast(pixabayInformation)
-        if (count !== 1) {
-            galleryEl.insertAdjacentHTML('beforeend', markup(pixabayInformation.data));
+        izitoast(first40)
+
+        console.log(count)
+        if (count === 1) {
+            console.log("count % 2 === 0", count % 2 === 0)
+            // парсим самі перші 40 елементів
+            galleryEl.innerHTML = markup(first40)
             gallery.refresh();
         } else {
-            galleryEl.innerHTML = markup(pixabayInformation.data)
+            // парсим перші послідовні 40 елементів
+            galleryEl.insertAdjacentHTML('beforeend', markup(first40));
             gallery.refresh();
+            scrollToNextGroup();
         }
-        scrollToNextGroup();
-    } catch (error) {
 
+    } catch (error) {
+        console.error(error.message);
     }
 
 };
 
 
-function markup({ hits }) {
+function markup(hits) {
 
     const typset = hits.map(item => `
     <li class="gallery__item">
@@ -102,38 +121,27 @@ const izitoast = (value) => {
 
     try {
 
-        if (count === 13) {
-            BtnMoreEl.classList.add('switcher')
 
-            return iziToast.info({
-                title: 'Hey!',
-                message: 'Sorry, there are no more images matching your search query. Please try find some another photo!',
-            });
-        }
-
-
-        if (value.data.hits.length < 40) {
+        if (value.length < 40 & value.length !== 0) {
             BtnMoreEl.classList.add('switcher');
             return iziToast.info({
                 title: 'Hey!',
-                message: 'Sorry, there are no more images matching your search query.',
+                message: 'We re sorry, but you ve reached the end of search results.',
             });
         }
-
-        if (value.data.hits.length === 0) {
+        if (value.length === 0) {
             BtnMoreEl.classList.add('switcher');
-            galleryEl.innerHTML = ''
             return iziToast.error({
                 title: 'Error',
                 message: 'Sorry, there are no images matching your search query. Please try again!',
             });
-
         }
+
         BtnMoreEl.classList.remove('switcher');
 
 
     } catch (error) {
-
+        console.error(error.message);
     }
 
 };
@@ -160,13 +168,13 @@ function getGalleryItemHeight() {
     const firstGalleryItem = document.querySelector('.gallery__item');
     if (firstGalleryItem) {
         const rect = firstGalleryItem.getBoundingClientRect();
-        return rect.height;
+        return Math.round(rect.height);
     }
     return 0;
 }
 
 function scrollToNextGroup() {
-    const galleryItemHeight = getGalleryItemHeight();
+    const galleryItemHeight = getGalleryItemHeight()
 
     if (galleryItemHeight > 0) {
         window.scrollBy({
@@ -185,20 +193,34 @@ loaderSwitch();
 
 formEl.addEventListener('submit', (event) => {
     event.preventDefault()
+    newCount = 1;
     count = 1;
     loaderSwitch()
     response(1, inputEl.value)
     saveInputValue(inputEl.value);
     formEl.reset()
 });
-
 BtnMoreEl.addEventListener('click', (event) => {
-
     loaderMoreSwitch()
-    count += 1
+    count += 1;
     searchValue = nonExistSpan.textContent;
-    response(count, searchValue)
     loaderSwitch()
     loaderMoreSwitch()
+
+    if (count % 2 === 0) {
+        //  зараз парсим другі 40 елементів
+
+        galleryEl.insertAdjacentHTML('beforeend', markup(second40Array));
+        izitoast(second40Array);
+        gallery.refresh();
+        loaderSwitch();
+        newCount += 1;
+        //   'я побіг перевіряти чи буде доступ до наступного хттп запиту'
+        fetchImagesFromApi(newCount, searchValue)
+    } else {
+
+        response(newCount, searchValue)
+    }
+    scrollToNextGroup()
 });
 
